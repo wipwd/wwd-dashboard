@@ -32,16 +32,15 @@ them.
       >   Adds new feature FOO, which will make everything so much better
       >   because it will do BAR as BAZ.
       >
-      >   Signed-off-by: Joao Eduardo Luis <joao@wipwd.dev>
+      >   Signed-off-by: Joao Eduardo Luis \<joao@wipwd.dev\>
       >
 
    And not
       > add feature FOO to frontend to do BAR and BAZ
       >
-      >   Signed-off-by: Joao Eduardo Luis <joao@wipwd.dev>
+      >   Signed-off-by: Joao Eduardo Luis \<joao@wipwd.dev\>
 
-
-  The former is okay, the latter is not.
+   The former is okay, the latter is not.
 
 4. A patch set must be composed of logically independent commits.
 
@@ -93,7 +92,7 @@ them.
    >
    > Fixes: https://github.com/wipwd/wwd-dashboard/issues/1337
    >
-   > Signed-off-by: Joao Eduardo Luis <joao@wipwd.dev>
+   > Signed-off-by: Joao Eduardo Luis \<joao@wipwd.dev\>
    >
 
 9. Never commit to master directly!
