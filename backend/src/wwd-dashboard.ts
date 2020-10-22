@@ -8,6 +8,7 @@
  */
 
 import { Logger } from "tslog";
+import { DBDriver } from './driver/DBDriver';
 import { HTTPDriver } from './driver/HTTPDriver';
 
 
@@ -30,6 +31,7 @@ async function sleep(ms: number): Promise<void> {
 
 async function main(): Promise<void> {
     try {
+        DBDriver.open("./dashboard.db");
         const _http: HTTPDriver = HTTPDriver.getInstance();
         logger.info("starting up...");
         _http.startup();

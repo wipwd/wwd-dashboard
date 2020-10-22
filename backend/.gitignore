@@ -2,3 +2,4 @@
 dashboard-config.json
 /dist
 tsconfig.tsbuildinfo
+/dashboard.db
