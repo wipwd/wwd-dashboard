@@ -31,7 +31,13 @@ async function sleep(ms: number): Promise<void> {
 
 async function main(): Promise<void> {
     try {
-        DBDriver.open("./dashboard.db");
+        const _db: DBDriver = new DBDriver();
+        _db.startup();
+        while (!_db.isConnected()) {
+            logger.info("waiting for database to be ready...");
+            await sleep(1000);
+        }
+
         const _http: HTTPDriver = HTTPDriver.getInstance();
         logger.info("starting up...");
         _http.startup();
@@ -42,7 +48,11 @@ async function main(): Promise<void> {
 
         logger.info("shutting down...");
         _http.shutdown();
-
+        _db.shutdown();
+        while (_db.isConnected()) {
+            logger.info("waiting for database shutdown...");
+            await sleep(1000);
+        }
     } catch (e) {
         logger.error("error: ", e);
     }
