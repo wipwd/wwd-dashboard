@@ -19,12 +19,21 @@ export interface DBDriverConfig {
 
 export class DBDriver extends Driver<DBDriverConfig> {
 
+    private static instance: DBDriver;
+
     private _client?: MongoClient;
     private _db?: Db;
     private _is_connected: boolean = false;
 
-    public constructor() {
+    private constructor() {
         super("mongodb", true);
+    }
+
+    public static getInstance(): DBDriver {
+        if (!DBDriver.instance) {
+            DBDriver.instance = new DBDriver();
+        }
+        return DBDriver.instance;
     }
 
     private async _connect(): Promise<void> {

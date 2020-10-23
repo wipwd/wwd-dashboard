@@ -31,7 +31,7 @@ async function sleep(ms: number): Promise<void> {
 
 async function main(): Promise<void> {
     try {
-        const _db: DBDriver = new DBDriver();
+        const _db: DBDriver = DBDriver.getInstance();
         _db.startup();
         while (!_db.isConnected()) {
             logger.info("waiting for database to be ready...");
