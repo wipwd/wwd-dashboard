@@ -1,0 +1,20 @@
+
+.panels-headers-align .mat-expansion-panel-header-title,
+.panels-headers-align .mat-expansion-panel-header-description {
+  flex-basis: 0;
+}
+
+.panels-headers-align .mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mat-badge-small.mat-badge-above .mat-badge-content {
+  top: unset;
+  right: unset;
+}
+
+.mat-badge-medium.mat-badge-above .mat-badge-content {
+  top: unset;
+  right: -30px;
+}
