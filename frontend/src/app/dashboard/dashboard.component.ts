@@ -10,12 +10,30 @@ import { map, shareReplay } from 'rxjs/operators';
 })
 export class DashboardComponent {
 
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
+  private isHandset: boolean = false;
+  public isHandset$: Observable<boolean> =
+    this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
       shareReplay()
     );
 
-  constructor(private breakpointObserver: BreakpointObserver) {}
+  public isMenuExpanded: boolean = false;
+
+  constructor(private breakpointObserver: BreakpointObserver) {
+    this.isHandset$.subscribe({
+      next: (result: boolean) => {
+        this.isHandset = result;
+      }
+    });
+  }
+
+  public toggleMenu(): void {
+    this.isMenuExpanded = !this.isMenuExpanded;
+  }
+
+  public isExpanded(): boolean {
+    return this.isMenuExpanded || this.isHandset;
+  }
 
 }

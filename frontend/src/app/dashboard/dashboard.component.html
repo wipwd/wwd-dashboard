@@ -1,20 +1,32 @@
-<mat-sidenav-container class="sidenav-container">
+<mat-sidenav-container class="sidenav-container" autosize>
   <mat-sidenav #drawer class="sidenav" fixedInViewport
       [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
       [mode]="(isHandset$ | async) ? 'over' : 'side'"
-      [opened]="(isHandset$ | async) === false">
-    <mat-toolbar>Menu</mat-toolbar>
+      [opened]="(isHandset$ | async) === false"
+      >
+    <mat-toolbar>
+      <button
+        class="menu-header-button"
+        type="button"
+        aria-label="Expand sidebar menu"
+        mat-icon-button
+        (click)="toggleMenu()"
+        *ngIf="!(isHandset$ | async)">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="menu-item" *ngIf="isExpanded()">Menu</span>
+    </mat-toolbar>
     <mat-nav-list>
       <a mat-list-item routerLinkActive="active" routerLink="/tabs">
         <mat-icon>inbox_all</mat-icon>
-        <span class="menu-item">Tasks</span></a>
+        <span class="menu-item" *ngIf="isExpanded()">Tasks</span></a>
       <a mat-list-item href="#">
         <mat-icon>analytics</mat-icon>
-        <span class="menu-item">Analytics</span>
+        <span class="menu-item" *ngIf="isExpanded()">Analytics</span>
       </a>
       <a mat-list-item href="#">
         <mat-icon>pending_actions</mat-icon>
-        <span class="menu-item">Reports</span>
+        <span class="menu-item" *ngIf="isExpanded()">Reports</span>
       </a>
     </mat-nav-list>
   </mat-sidenav>

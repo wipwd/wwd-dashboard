@@ -3,7 +3,6 @@
 }
 
 .sidenav {
-  width: 200px;
 }
 
 .sidenav .mat-toolbar {
@@ -18,4 +17,8 @@
 
 .menu-item {
   padding-left: 5px;
+}
+
+.menu-header-button.mat-icon-button {
+  width: unset;
 }
