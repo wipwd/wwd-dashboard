@@ -41,10 +41,26 @@
       <!-- menu footer -->
       <div>
         <mat-divider></mat-divider>
-        <mat-nav-list>
-          <a mat-list-item href="#">
+        <!-- settings menu -->
+        <mat-toolbar>
+          <button
+            class="menu-header-button"
+            type="button"
+            aria-label="Expand settings menu"
+            mat-icon-button
+            (click)="toggleSettings()">
             <mat-icon>settings</mat-icon>
-            <span class="menu-item" *ngIf="isExpanded()">Settings</span>
+          </button>
+          <span *ngIf="isExpanded()">Settings</span>
+        </mat-toolbar>
+        <mat-nav-list *ngIf="isSettingsExpanded()">
+          <a mat-list-item href="#">
+            <mat-icon>build</mat-icon>
+            <span class="menu-item" *ngIf="isExpanded()">Config</span>
+          </a>
+          <a mat-list-item href="#">
+            <mat-icon>code</mat-icon>
+            <span class="menu-item" *ngIf="isExpanded()">Integrations</span>
           </a>
         </mat-nav-list>
       </div>

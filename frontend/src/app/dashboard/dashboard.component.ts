@@ -12,6 +12,7 @@ export class DashboardComponent {
 
   private _is_menu_expanded: boolean = false;
   private _is_handset: boolean = false;
+  private _is_settings_expanded: boolean = false;
 
   public isHandset$: Observable<boolean> =
     this.breakpointObserver.observe(Breakpoints.Handset)
@@ -35,5 +36,13 @@ export class DashboardComponent {
 
   public isExpanded(): boolean {
     return this._is_menu_expanded || this._is_handset;
+  }
+
+  public toggleSettings(): void {
+    this._is_settings_expanded = !this._is_settings_expanded;
+  }
+
+  public isSettingsExpanded(): boolean {
+    return this._is_settings_expanded;
   }
 }
