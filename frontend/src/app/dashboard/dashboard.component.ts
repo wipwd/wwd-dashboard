@@ -10,7 +10,9 @@ import { map, shareReplay } from 'rxjs/operators';
 })
 export class DashboardComponent {
 
-  private isHandset: boolean = false;
+  private _is_menu_expanded: boolean = false;
+  private _is_handset: boolean = false;
+
   public isHandset$: Observable<boolean> =
     this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
@@ -18,22 +20,20 @@ export class DashboardComponent {
       shareReplay()
     );
 
-  public isMenuExpanded: boolean = false;
 
   constructor(private breakpointObserver: BreakpointObserver) {
     this.isHandset$.subscribe({
       next: (result: boolean) => {
-        this.isHandset = result;
+        this._is_handset = result;
       }
     });
   }
 
   public toggleMenu(): void {
-    this.isMenuExpanded = !this.isMenuExpanded;
+    this._is_menu_expanded = !this._is_menu_expanded;
   }
 
   public isExpanded(): boolean {
-    return this.isMenuExpanded || this.isHandset;
+    return this._is_menu_expanded || this._is_handset;
   }
-
 }
