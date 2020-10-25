@@ -20,7 +20,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { TasksOrganizerComponent } from './tasks-organizer/tasks-organizer.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatChipsModule } from '@angular/material/chips';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   declarations: [
@@ -46,7 +46,7 @@ import { MatChipsModule } from '@angular/material/chips';
     MatSortModule,
     MatExpansionModule,
     MatBadgeModule,
-    MatChipsModule
+    FlexLayoutModule
   ],
   providers: [],
   bootstrap: [AppComponent]
