@@ -1,0 +1,45 @@
+<mat-accordion multi class="panels-headers-align">
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <span
+          matBadge="1"
+          matBadgeOverlap="false"
+          matBadgeSize="medium"
+          matBadgeColor="warn">Urgent</span>
+      </mat-panel-title>
+      <mat-panel-description>
+        <span></span>
+        <mat-icon>error_outline</mat-icon>
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+    <app-tasks-table></app-tasks-table>
+  </mat-expansion-panel>
+
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <span
+          matBadge="10"
+          matBadgeOverlap="false"
+          matBadgeSize="medium"
+          matBadgeColor="primary">Normal</span>
+      </mat-panel-title>
+      <mat-panel-description><span></span><mat-icon>pending</mat-icon></mat-panel-description>
+    </mat-expansion-panel-header>
+    <app-tasks-table></app-tasks-table>
+  </mat-expansion-panel>
+
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <span
+          matBadge="10"
+          matBadgeOverlap="false"
+          matBadgeSize="medium">Other</span>
+      </mat-panel-title>
+      <mat-panel-description><span></span><mat-icon>all_inbox</mat-icon></mat-panel-description>
+    </mat-expansion-panel-header>
+    <app-tasks-table></app-tasks-table>
+  </mat-expansion-panel>
+</mat-accordion>
