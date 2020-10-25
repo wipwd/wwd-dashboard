@@ -14,7 +14,8 @@
         *ngIf="!(isHandset$ | async)">
         <mat-icon>menu</mat-icon>
       </button>
-      <span class="menu-item" *ngIf="isExpanded()">Menu</span>
+      <span
+        [class.expanded-sidenav]="isExpanded()" *ngIf="isExpanded()">Menu</span>
     </mat-toolbar>
     <mat-nav-list>
       <a mat-list-item routerLinkActive="active" routerLink="/tabs">
