@@ -14,15 +14,10 @@ import { BehaviorSubject } from 'rxjs';
 import { Logger } from 'tslog';
 
 
-export interface BackendConfig {
-    http: {
-        host: string;
-        port: number;
-    };
-}
+export type BackendConfig = {[id: string]: any};
 
 export abstract class ConfigValidator {
-    public abstract validConfig(config: BackendConfig): boolean;
+    public abstract validConfig(config: any): boolean;
 }
 
 const logger: Logger = new Logger({name: "config-svc"});
@@ -30,14 +25,8 @@ const logger: Logger = new Logger({name: "config-svc"});
 export class ConfigService {
 
     private static instance: ConfigService;
-    private _default_config: BackendConfig = {
-        http: {
-            host: "0.0.0.0",
-            port: 31338
-        }
-    };
     private _config = {} as BackendConfig;
-    private _validators: ConfigValidator[] = [];
+    private _validators: {[id: string]: ConfigValidator} = {};
 
     _config_update: BehaviorSubject<BackendConfig>;
 
@@ -57,12 +46,15 @@ export class ConfigService {
         return ConfigService.getInstance().getConfig();
     }
 
-    public static getConfigOneTime(): BackendConfig {
-        return ConfigService.getInstance().getConfigOneTime();
+    public static getConfigOnce(): BackendConfig {
+        return ConfigService.getInstance().getConfigOnce();
     }
 
-    public static registerValidator(validator: ConfigValidator): void {
-        return ConfigService.getInstance().registerValidator(validator);
+    public static registerValidator(
+        name: string,
+        validator: ConfigValidator
+    ): void {
+        return ConfigService.getInstance().registerValidator(name, validator);
     }
 
     private _updateAll(): void {
@@ -70,12 +62,12 @@ export class ConfigService {
     }
 
     private _load(): void {
-        let config: BackendConfig = this._default_config;
+        let config: BackendConfig = {};
         if (fs.existsSync('./dashboard-config.json')) {
             const rawconf = fs.readFileSync('./dashboard-config.json');
             config = JSON.parse(rawconf.toString("utf-8"));
             if (Object.keys(config).length === 0) {
-                config = this._default_config;
+                config = {};
             }
         }
         this._config = config;
@@ -97,19 +89,24 @@ export class ConfigService {
         this._updateAll();
     }
 
-    public registerValidator(validator: ConfigValidator): void {
-        this._validators.push(validator);
+    public registerValidator(name: string, validator: ConfigValidator): void {
+        this._validators[name] = validator;
+        this.load();
     }
 
     public setConfig(config: BackendConfig): boolean {
         let valid: boolean = true;
-        if (this._validators.length === 0) {
+        if (Object.keys(this._validators).length === 0) {
             logger.info("no validators, refuse setting config.");
             return false;
         }
-        this._validators.forEach( (validator: ConfigValidator) => {
-            if (!validator.validConfig(config)) {
-                logger.info("invalid config, don't set.");
+        Object.keys(this._validators).forEach( (_name: string) => {
+            if (!(_name in config)) {
+                return;
+            }
+            const _validator_config: any = config[_name];
+            if (!this._validators[_name].validConfig(_validator_config)) {
+                logger.warn(`invalid config for ${_name}; don't set.`);
                 valid = false;
             }
         });
@@ -126,7 +123,7 @@ export class ConfigService {
         return this._config_update;
     }
 
-    public getConfigOneTime(): BackendConfig {
+    public getConfigOnce(): BackendConfig {
         return this._config;
     }
 }

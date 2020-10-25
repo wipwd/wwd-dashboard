@@ -13,10 +13,10 @@ import { Logger } from 'tslog';
 import { BackendConfig, ConfigService, ConfigValidator } from "./ConfigService";
 
 
-export abstract class Driver extends ConfigValidator {
+export abstract class Driver<T> extends ConfigValidator {
 
     protected logger: Logger;
-    protected _config: BackendConfig = {} as BackendConfig;
+    protected _config: T = {} as T;
     private _has_config: boolean = false;
     private _is_running: boolean = false;
     private _wants_startup: boolean = false;
@@ -30,7 +30,7 @@ export abstract class Driver extends ConfigValidator {
         ConfigService.getConfig().subscribe(
             this._handleUpdateConfig.bind(this)
         );
-        ConfigService.registerValidator(this);
+        ConfigService.registerValidator(_driver_name, this);
     }
 
     private _handleUpdateConfig(config: BackendConfig): void {
@@ -40,11 +40,15 @@ export abstract class Driver extends ConfigValidator {
             }
             return;
         }
-        if (!this._shouldUpdateConfig(config)) {
+        if (!(this._driver_name in config)) {
+            this.logger.debug(`driver ${this._driver_name} not in config`);
+            return;
+        }
+        if (!this._shouldUpdateConfig(config[this._driver_name])) {
             this.logger.warn("driver not updating config");
             return;
         }
-        this._config = config;
+        this._config = config[this._driver_name] as T;
         this._has_config = true;
         if (this._wants_startup) {
             this.logger.info("config updated, driver wants startup.");
@@ -84,6 +88,7 @@ export abstract class Driver extends ConfigValidator {
         }
         this._is_running = true;
         this._wants_startup = false;
+        this.logger.info("driver started");
         return true;
     }
 
@@ -112,7 +117,8 @@ export abstract class Driver extends ConfigValidator {
         return true;
     }
 
-    public validConfig(config: BackendConfig): boolean {
+    public validConfig(_config: any): boolean {
+        const config: T = _config as T;
         const res: boolean = this._shouldUpdateConfig(config);
         if (!res) {
             this.logger.info(`config not valid for driver ${this.driverName}`);

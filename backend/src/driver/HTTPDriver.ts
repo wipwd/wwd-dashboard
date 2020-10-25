@@ -11,7 +11,6 @@
 
 import { RegisterRoutes } from '../tsoa/routes';
 import { Driver } from './Driver';
-import { BackendConfig } from './ConfigService';
 import swaggerUi from 'swagger-ui-express';
 import express, {
     Response as ExResponse, Request as ExRequest, RequestHandler
@@ -21,8 +20,12 @@ import bodyParser from 'body-parser';
 import fs from 'fs';
 import { Server } from 'http';
 
+export interface HTTPDriverConfig {
+    host: string;
+    port: number;
+}
 
-export class HTTPDriver extends Driver {
+export class HTTPDriver extends Driver<HTTPDriverConfig> {
 
     private static instance: HTTPDriver;
     private httpApp = express();
@@ -53,20 +56,20 @@ export class HTTPDriver extends Driver {
     }
 
     public _startup(): boolean {
-        if (Object.keys(this._config.http).length === 0) {
+        if (Object.keys(this._config).length === 0) {
             this.logger.error("http config not available");
             return false;
         }
-        if (!this._config.http.host || this._config.http.host === "") {
+        if (!this._config.host || this._config.host === "") {
             this.logger.error("http host config not provided");
             return false;
         }
-        if (!this._config.http.port || this._config.http.port <= 0) {
+        if (!this._config.port || this._config.port <= 0) {
             this.logger.error("http port config not provided or incorrect");
             return false;
         }
-        this._http_host = this._config.http.host;
-        this._http_port = this._config.http.port;
+        this._http_host = this._config.host;
+        this._http_port = this._config.port;
         this.httpServer = this.httpApp.listen(this._http_port, this._http_host);
         if (!this.httpServer) {
             this.logger.error("unable to start http driver");
@@ -87,15 +90,14 @@ export class HTTPDriver extends Driver {
         return true;
     }
 
-    protected _shouldUpdateConfig(config: BackendConfig): boolean {
+    protected _shouldUpdateConfig(config: HTTPDriverConfig): boolean {
         return (
             Object.keys(config).length > 0 &&
-            Object.keys(config.http).length > 0 &&
-            !!config.http.host && config.http.host !== "" &&
-            !!config.http.port && config.http.port > 0 &&
+            !!config.host && config.host !== "" &&
+            !!config.port && config.port > 0 &&
             (
-                config.http.host !== this._http_host ||
-                config.http.port !== this._http_port
+                config.host !== this._http_host ||
+                config.port !== this._http_port
             )
         );
     }

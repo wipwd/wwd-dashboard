@@ -31,7 +31,7 @@ export class ConfigController extends Controller {
     @Get("")
     public async getConfig(): Promise<APIConfigItem> {
         return {
-            config: svc.getConfigOneTime()
+            config: svc.getConfigOnce()
         };
     }
 }
