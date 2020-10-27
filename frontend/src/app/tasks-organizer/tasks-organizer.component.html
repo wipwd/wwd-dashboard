@@ -15,7 +15,8 @@
       </mat-panel-description>
     </mat-expansion-panel-header>
     <app-tasks-table
-      [bucketsvc]="getBucketService()"
+      [bucket_from]="getBucketFrom()"
+      [bucket_next]="getBucketNext()"
       [priority]="getUrgentPrio()"
       num_items="10">
     </app-tasks-table>
@@ -34,7 +35,8 @@
       <mat-panel-description><span></span><mat-icon>pending</mat-icon></mat-panel-description>
     </mat-expansion-panel-header>
     <app-tasks-table
-      [bucketsvc]="getBucketService()"
+      [bucket_from]="getBucketFrom()"
+      [bucket_next]="getBucketNext()"
       [priority]="getNormalPrio()"
       num_items="10">
     </app-tasks-table>
@@ -53,7 +55,8 @@
       <mat-panel-description><span></span><mat-icon>all_inbox</mat-icon></mat-panel-description>
     </mat-expansion-panel-header>
     <app-tasks-table
-      [bucketsvc]="getBucketService()"
+      [bucket_from]="getBucketFrom()"
+      [bucket_next]="getBucketNext()"
       [priority]="getOtherPrio()"
       num_items="10">
     </app-tasks-table>

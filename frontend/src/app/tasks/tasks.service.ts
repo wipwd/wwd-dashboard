@@ -1,3 +1,4 @@
+import { error } from '@angular/compiler/src/util';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, interval, Observable, of } from 'rxjs';
 import * as uuid from 'uuid';
@@ -29,7 +30,10 @@ export abstract class TasksBucketBaseService {
   protected _subject_tasks_total: BehaviorSubject<number> =
     new BehaviorSubject<number>(0);
 
-  protected constructor(protected _svc: TasksService) {
+  protected constructor(
+    protected _svc: TasksService,
+    protected _bucket_name: string
+  ) {
     this._subject_tasks_svc = this._obtainTaskSubject();
     this._subject_tasks_svc.subscribe({
       next: (tasks: TaskItem[]) => {
@@ -66,6 +70,10 @@ export abstract class TasksBucketBaseService {
     return this._tasks.length;
   }
 
+  public getBucketName(): string {
+    return this._bucket_name;
+  }
+
   protected abstract _tasksUpdated(): void;
   protected abstract _obtainTaskSubject(): BehaviorSubject<TaskItem[]>;
 }
@@ -75,78 +83,167 @@ function rand(max: number): number {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
+declare type MockBucketTasks = {[id: string]: TaskItem};
+
+export interface MockBucket {
+  name: string;
+  label: string;
+  tasks: MockBucketTasks;
+}
+
+declare type MockResponseData =
+  MockBucket |
+  MockBucketTasks |
+  TaskItem |
+  TaskItem[] |
+  string |
+  string[];
+
+export interface MockResponse<T> {
+  success: boolean;
+  data?: T;
+}
+
 class MockServer {
 
-  private _backlog: TaskItem[];
-  private _next: TaskItem[];
-  private _inprogress: TaskItem[];
-  private _done: TaskItem[];
+  private _buckets: {[id: string]: MockBucket} = {};
+  private _tasks: TaskItem[] = [];
 
   public constructor() {
-    this._backlog = [
-      {
-        uuid: uuid.v4(),
-        updated_at: new Date(),
-        title: "My Test Task A",
-        priority: TaskPriorityEnum.medium,
-        url: "https://fail.wipwd.dev/task/a"
-      },
-      {
-        uuid: uuid.v4(),
-        updated_at: new Date(),
-        title: "My Test Task B",
-        priority: TaskPriorityEnum.high,
-        url: "https://fail.wipwd.dev/task/b"
-      },
-      {
-        uuid: uuid.v4(),
-        updated_at: new Date(),
-        title: "My Test Task C",
-        priority: TaskPriorityEnum.low,
-        url: "https://fail.wipwd.dev/task/c"
-      },
-      {
-        uuid: uuid.v4(),
-        updated_at: new Date(),
-        title: "My Test Task D",
-        priority: TaskPriorityEnum.none,
-        url: "https://fail.wipwd.dev/task/d"
-      }
-    ];
-    this._next = [];
-    this._inprogress = [];
-    this._done = [];
+
+    const taskA: TaskItem = {
+      uuid: uuid.v4(),
+      updated_at: new Date(),
+      title: "My Test Task A",
+      priority: TaskPriorityEnum.medium,
+      url: "https://fail.wipwd.dev/task/a"
+    };
+    const taskB: TaskItem = {
+      uuid: uuid.v4(),
+      updated_at: new Date(),
+      title: "My Test Task B",
+      priority: TaskPriorityEnum.high,
+      url: "https://fail.wipwd.dev/task/b"
+    };
+    const taskC: TaskItem = {
+      uuid: uuid.v4(),
+      updated_at: new Date(),
+      title: "My Test Task C",
+      priority: TaskPriorityEnum.low,
+      url: "https://fail.wipwd.dev/task/c"
+    };
+    const taskD: TaskItem = {
+      uuid: uuid.v4(),
+      updated_at: new Date(),
+      title: "My Test Task D",
+      priority: TaskPriorityEnum.none,
+      url: "https://fail.wipwd.dev/task/d"
+    };
+
+    this._createBucket("backlog", "Backlog");
+    this._createBucket("next", "Next");
+    this._createBucket("inprogress", "In Progress");
+    this._createBucket("done", "Done");
+
+    this._buckets.backlog.tasks[taskA.uuid] = taskA;
+    this._buckets.backlog.tasks[taskB.uuid] = taskB;
+    this._buckets.backlog.tasks[taskC.uuid] = taskC;
+    this._buckets.backlog.tasks[taskD.uuid] = taskD;
+    this._tasks = [taskA, taskB, taskC, taskD];
+  }
+
+  private _hasBucket(bucket_name: string): boolean {
+    return (bucket_name in this._buckets);
+  }
+
+  private _hasTaskInBucket(bucket_name: string, task_uuid: string): boolean {
+    if (!this._hasBucket(bucket_name)) {
+      return false;
+    }
+    if (!(task_uuid in this._buckets[bucket_name].tasks)) {
+      return false;
+    }
+    return true;
+  }
+
+  private _createBucket(bucket_name: string, bucket_label: string): void {
+    if (this._hasBucket(bucket_name)) {
+      return;
+    }
+    this._buckets[bucket_name] = {
+      name: bucket_name,
+      label: bucket_label,
+      tasks: {}
+    };
+  }
+
+  private _createResponse<T>(
+    _success: boolean,
+    _data?: T
+  ): MockResponse<T> {
+    return { success: _success, data: _data};
   }
 
   public tick(): void {
-    if (!this._backlog || this._backlog.length === 0) {
+    // update random task.
+    if (this._tasks.length === 0) {
       return;
     }
-    // update a task in each bucket.
-    const _backlog_item: number = rand(this._backlog.length);
-    const _next_item: number = rand(this._next.length);
-
-    if (this._backlog.length > 0) {
-      this._backlog[_backlog_item].updated_at = new Date();
-    }
-    if (this._next.length > 0) {
-      this._next[_next_item].updated_at = new Date();
-    }
+    const _task_idx: number = rand(this._tasks.length);
+    this._tasks[_task_idx].updated_at = new Date();
   }
 
-  public getBucket(bucket_name: string): Observable<TaskItem[]|undefined> {
-    switch (bucket_name) {
-      case "backlog":
-        return of(this._backlog);
-      case "next":
-        return of(this._next);
-      case "inprogress":
-        return of(this._inprogress);
-      case "done":
-        return of(this._done);
-      default:
-        return of(undefined);
+  public getBucket(bucket_name: string): Observable<MockResponse<MockBucket>> {
+    if (!(bucket_name in this._buckets)) {
+      return of(this._createResponse(false));
     }
+    return of(this._createResponse(true, this._buckets[bucket_name]));
+  }
+
+  public hasBucket(bucket_name: string): Observable<MockResponse<void>> {
+    return of(this._createResponse(this._hasBucket(bucket_name)));
+  }
+
+  public hasTaskInBucket(
+    bucket_name: string,
+    task_uuid: string
+  ): Observable<MockResponse<void>> {
+    return of(this._createResponse(
+      this._hasTaskInBucket(bucket_name, task_uuid)));
+  }
+
+  public move(
+    task_uuid: string,
+    from: string,
+    to: string
+  ): Observable<MockResponse<void>> {
+    if (!this._hasBucket(from)) {
+      console.error(`mock > move > no bucket ${from}`);
+      return of(this._createResponse<void>(false));
+    }
+    if (!this._hasTaskInBucket(from, task_uuid)) {
+      console.error(`mock > move > no task ${task_uuid} in bucket ${from}`);
+      return of(this._createResponse<void>(false));
+    }
+    if (!this._hasBucket(to)) {
+      console.error(`mock > move > no dest bucket ${to}`);
+      return of(this._createResponse<void>(false));
+    }
+    const bucket_from: MockBucket = this._buckets[from];
+    const bucket_to: MockBucket = this._buckets[to];
+    const task: TaskItem = bucket_from.tasks[task_uuid];
+    bucket_to.tasks[task.uuid] = task;
+    delete bucket_from.tasks[task.uuid];
+    return of(this._createResponse<void>(true));
+  }
+
+  public listBuckets(): Observable<MockResponse<string[]>> {
+    return of(
+      this._createResponse<string[]>(true, Object.keys(this._buckets)));
+  }
+
+  public listTasks(): Observable<MockResponse<TaskItem[]>> {
+    return of(this._createResponse<TaskItem[]>(true, this._tasks));
   }
 }
 
@@ -161,6 +258,8 @@ export class TasksService {
   private _bucket_inprogress: TaskItem[] = [];
   private _bucket_done: TaskItem[] = [];
   private _server: MockServer;
+  private _buckets: {[id: string]: MockBucket} = {};
+  private _bucket_subjects: {[id: string]: BehaviorSubject<TaskItem[]>} = {};
 
   private _subject_backlog: BehaviorSubject<TaskItem[]> =
     new BehaviorSubject<TaskItem[]>([]);
@@ -181,62 +280,54 @@ export class TasksService {
     this._updateBuckets();
   }
 
+  private _updateBucket(bucketname: string): void {
+    this._server.getBucket(bucketname).subscribe({
+      next: (response: MockResponse<MockBucket>) => {
+        // console.log(`task-svc > getBucket(${bucketname}) > `, response);
+        if (!response || !response.success || !response.data) {
+          return;
+        }
+        const bucket: MockBucket = response.data;
+        this._buckets[bucket.name] = bucket;
+        if (!(bucket.name in this._bucket_subjects)) {
+          this._bucket_subjects[bucket.name] =
+            new BehaviorSubject<TaskItem[]>([]);
+        }
+        this._bucket_subjects[bucket.name].next(Object.values(bucket.tasks));
+      }
+    });
+  }
+
   private _updateBuckets(): void {
-    const backlog_observer: Observable<TaskItem[]> =
-      this._server.getBucket("backlog");
-    const next_observer: Observable<TaskItem[]> =
-      this._server.getBucket("next");
-    const inprogress_observer: Observable<TaskItem[]> =
-      this._server.getBucket("inprogress");
-    const done_observer: Observable<TaskItem[]> =
-      this._server.getBucket("done");
-    if (!!backlog_observer) {
-      backlog_observer.subscribe({
-        next: (items: TaskItem[]) => {
-          this._bucket_backlog = items;
-          this._subject_backlog.next(items);
+
+    // console.log("tasks-svc > updateBuckets");
+    this._server.listBuckets().subscribe({
+      next: (response: MockResponse<string[]>) => {
+        // console.log("tasks-svc > listBuckets > ", response);
+        if (!response || !response.success || !response.data) {
+          return;
         }
-      });
-    }
-    if (!!next_observer) {
-      next_observer.subscribe({
-        next: (items: TaskItem[]) => {
-          this._bucket_next = items;
-          this._subject_next.next(items);
-        }
-      });
-    }
-    if (!!inprogress_observer) {
-      inprogress_observer.subscribe({
-        next: (items: TaskItem[]) => {
-          this._bucket_inprogress = items;
-          this._subject_inprogress.next(items);
-        }
-      });
-    }
-    if (!!done_observer) {
-      done_observer.subscribe({
-        next: (items: TaskItem[]) => {
-          this._bucket_done = items;
-          this._subject_done.next(items);
-        }
-      });
-    }
+        response.data.forEach( (bucket: string) => {
+          this._updateBucket(bucket);
+        });
+      }
+    });
   }
 
-  public getBacklog(): BehaviorSubject<TaskItem[]> {
-    return this._subject_backlog;
+  public getBucket(bucketname: string): BehaviorSubject<TaskItem[]> {
+    if (!(bucketname in this._bucket_subjects)) {
+      this._bucket_subjects[bucketname] =
+        new BehaviorSubject<TaskItem[]>([]);
+    }
+    return this._bucket_subjects[bucketname];
   }
 
-  public getNext(): BehaviorSubject<TaskItem[]> {
-    return this._subject_next;
-  }
-
-  public getInProgress(): BehaviorSubject<TaskItem[]> {
-    return this._subject_inprogress;
-  }
-
-  public getDone(): BehaviorSubject<TaskItem[]> {
-    return this._subject_done;
+  public move(
+    task: TaskItem,
+    from: TasksBucketBaseService,
+    to: TasksBucketBaseService
+  ): void {
+    this._server.move(task.uuid, from.getBucketName(), to.getBucketName());
+    this._updateBuckets();
   }
 }

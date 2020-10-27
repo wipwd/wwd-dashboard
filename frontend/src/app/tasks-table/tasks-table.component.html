@@ -24,6 +24,20 @@
       <td mat-cell *matCellDef="let row">{{row.priority}}</td>
     </ng-container>
 
+    <!-- Actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Actions</th>
+      <td mat-cell *matCellDef="let row">
+        <mat-icon>check_circle</mat-icon>
+        <mat-icon>cancel</mat-icon>
+        <button *ngIf="hasNext()"
+          mat-icon-button (click)="onMoveNext(row)">
+          <mat-icon>redo</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>

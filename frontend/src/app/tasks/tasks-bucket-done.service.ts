@@ -12,12 +12,12 @@ import {
 export class TasksBucketDoneService extends TasksBucketBaseService {
 
   public constructor(private _tasks_svc: TasksService) {
-    super(_tasks_svc);
+    super(_tasks_svc, "done");
   }
 
   protected _tasksUpdated(): void { }
 
   protected _obtainTaskSubject(): BehaviorSubject<TaskItem[]> {
-    return this._svc.getDone();
+    return this._svc.getBucket("done");
   }
 }

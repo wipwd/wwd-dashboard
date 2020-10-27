@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { TasksBucketBacklogService } from '../tasks/tasks-bucket-backlog.service';
-import { TaskItem, TaskPriorityEnum, TasksBucketBaseService, TasksService } from '../tasks/tasks.service';
+import { TaskItem, TaskPriorityEnum, TasksBucketBaseService } from '../tasks/tasks.service';
 
 @Component({
   selector: 'app-tasks-organizer',
@@ -9,7 +8,8 @@ import { TaskItem, TaskPriorityEnum, TasksBucketBaseService, TasksService } from
 })
 export class TasksOrganizerComponent implements OnInit {
 
-  @Input() bucketsvc: TasksBucketBaseService;
+  @Input() bucket_from: TasksBucketBaseService;
+  @Input() bucket_next: TasksBucketBaseService;
 
   private _num_urgent: number = 0;
   private _num_normal: number = 0;
@@ -28,10 +28,10 @@ export class TasksOrganizerComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    if (!this.bucketsvc) {
+    if (!this.bucket_from) {
       return;
     }
-    this.bucketsvc.getTasksObserver().subscribe({
+    this.bucket_from.getTasksObserver().subscribe({
       next: (tasks: TaskItem[]) => {
         this._num_urgent = 0;
         this._num_normal = 0;
@@ -41,8 +41,12 @@ export class TasksOrganizerComponent implements OnInit {
     });
   }
 
-  public getBucketService(): TasksBucketBaseService {
-    return this.bucketsvc;
+  public getBucketFrom(): TasksBucketBaseService {
+    return this.bucket_from;
+  }
+
+  public getBucketNext(): TasksBucketBaseService {
+    return this.bucket_next;
   }
 
   public getNumUrgentTasks(): number {
