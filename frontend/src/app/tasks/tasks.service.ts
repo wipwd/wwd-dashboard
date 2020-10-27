@@ -237,6 +237,23 @@ class MockServer {
     return of(this._createResponse<void>(true));
   }
 
+  public drop(
+    from: string,
+    task_uuid: string
+  ): Observable<MockResponse<void>> {
+    if (!this._hasBucket(from)) {
+      console.error(`mock > drop > no bucket ${from}`);
+      return of(this._createResponse<void>(false));
+    }
+    if (!this._hasTaskInBucket(from, task_uuid)) {
+      console.error(`mock > drop > no task ${task_uuid} in bucket ${from}`);
+      return of(this._createResponse<void>(false));
+    }
+    const bucket: MockBucket = this._buckets[from];
+    delete bucket.tasks[task_uuid];
+    return of(this._createResponse<void>(true));
+  }
+
   public listBuckets(): Observable<MockResponse<string[]>> {
     return of(
       this._createResponse<string[]>(true, Object.keys(this._buckets)));
@@ -327,7 +344,21 @@ export class TasksService {
     from: TasksBucketBaseService,
     to: TasksBucketBaseService
   ): void {
-    this._server.move(task.uuid, from.getBucketName(), to.getBucketName());
-    this._updateBuckets();
+    this._server.move(
+      task.uuid, from.getBucketName(), to.getBucketName()
+    ).subscribe({
+      next: () => {
+        this._updateBuckets();
+      }
+    });
+    // this._updateBuckets();
+  }
+
+  public drop(from: TasksBucketBaseService, task: TaskItem): void {
+    this._server.drop(from.getBucketName(), task.uuid).subscribe({
+      next: () => {
+        this._updateBuckets();
+      }
+    });
   }
 }

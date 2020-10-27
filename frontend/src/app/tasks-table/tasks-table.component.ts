@@ -2,6 +2,7 @@ import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/cor
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
+import { TasksBucketDoneService } from '../tasks/tasks-bucket-done.service';
 import { TaskItem, TaskPriorityEnum, TasksBucketBaseService, TasksService } from '../tasks/tasks.service';
 import { TasksTableDataSource } from './tasks-table-datasource';
 
@@ -27,7 +28,10 @@ export class TasksTableComponent implements AfterViewInit, OnInit {
    */
   displayedColumns = ["priority", "title", "updated_at", "actions"];
 
-  constructor(private _tasks_svc: TasksService) { }
+  constructor(
+    private _tasks_svc: TasksService,
+    private _bucket_done: TasksBucketDoneService
+  ) { }
 
   ngOnInit(): void {
 
@@ -37,7 +41,6 @@ export class TasksTableComponent implements AfterViewInit, OnInit {
     }
 
     this.dataSource = new TasksTableDataSource(this.bucket_from, this.priority);
-    console.log("task-table > from: ", this.bucket_from, " next: ", this.bucket_next);
   }
 
   ngAfterViewInit(): void {
@@ -57,5 +60,19 @@ export class TasksTableComponent implements AfterViewInit, OnInit {
 
   public hasNext(): boolean {
     return !!this.bucket_next;
+  }
+
+  public ignoreTask(task: TaskItem): void {
+    console.log("ignore task ", task);
+    this._tasks_svc.drop(this.bucket_from, task);
+  }
+
+  public markDone(task: TaskItem): void {
+    console.log("mark task done ", task);
+    if (this.bucket_from === this._bucket_done) {
+      console.log("task already done");
+      return;
+    }
+    this._tasks_svc.move(task, this.bucket_from, this._bucket_done);
   }
 }
