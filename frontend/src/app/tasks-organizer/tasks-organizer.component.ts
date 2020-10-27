@@ -15,6 +15,10 @@ export class TasksOrganizerComponent implements OnInit {
   private _num_normal: number = 0;
   private _num_other: number = 0;
 
+  private _is_expanded_urgent: boolean = false;
+  private _is_expanded_normal: boolean = false;
+  private _is_expanded_other: boolean = false;
+
   constructor() { }
 
   private _handleTasks(tasks: TaskItem[]): void {
@@ -83,5 +87,29 @@ export class TasksOrganizerComponent implements OnInit {
 
   public getOtherPrio(): TaskPriorityEnum[] {
     return [TaskPriorityEnum.none, TaskPriorityEnum.low];
+  }
+
+  public isUrgentExpanded(): boolean {
+    return this._is_expanded_urgent && this.hasUrgentTasks();
+  }
+
+  public isNormalExpanded(): boolean {
+    return this._is_expanded_normal && this.hasNormalTasks();
+  }
+
+  public isOtherExpanded(): boolean {
+    return this._is_expanded_other && this.hasOtherTasks();
+  }
+
+  public toggleUrgent(): void {
+    this._is_expanded_urgent = !this._is_expanded_urgent;
+  }
+
+  public toggleNormal(): void {
+    this._is_expanded_normal = !this._is_expanded_normal;
+  }
+
+  public toggleOther(): void {
+    this._is_expanded_other = !this._is_expanded_other;
   }
 }

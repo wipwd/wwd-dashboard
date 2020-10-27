@@ -1,5 +1,9 @@
 <mat-accordion multi class="panels-headers-align">
-  <mat-expansion-panel>
+  <mat-expansion-panel
+      [disabled]="!hasUrgentTasks()"
+      [expanded]="isUrgentExpanded()"
+      (closed)="toggleUrgent()"
+      (opened)="toggleUrgent()">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <span *ngIf="hasUrgentTasks()"
@@ -22,7 +26,11 @@
     </app-tasks-table>
   </mat-expansion-panel>
 
-  <mat-expansion-panel>
+  <mat-expansion-panel
+      [disabled]="!hasNormalTasks()"
+      [expanded]="isNormalExpanded()"
+      (closed)="toggleNormal()"
+      (opened)="toggleNormal()">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <span *ngIf="hasNormalTasks()"
@@ -42,7 +50,11 @@
     </app-tasks-table>
   </mat-expansion-panel>
 
-  <mat-expansion-panel>
+  <mat-expansion-panel
+      [disabled]="!hasOtherTasks()"
+      [expanded]="isOtherExpanded()"
+      (closed)="toggleOther()"
+      (opened)="toggleOther()">
     <mat-expansion-panel-header>
       <mat-panel-title>
         <span *ngIf="hasOtherTasks()"
