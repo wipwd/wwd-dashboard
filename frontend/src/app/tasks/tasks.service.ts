@@ -104,12 +104,58 @@ export interface MockResponse<T> {
   data?: T;
 }
 
-class MockServer {
 
-  private _buckets: {[id: string]: MockBucket} = {};
-  private _tasks: TaskItem[] = [];
+class MockServerStorage {
+  private _storage: Storage;
+  // private _last_updated: Date = new Date(0);
 
   public constructor() {
+    this._storage = window.localStorage;
+  }
+
+  public has(key: string): boolean {
+    return (this._storage.getItem(key) !== null);
+  }
+
+  public get<T>(key: string): T|null {
+    if (!this.has(key)) {
+      return undefined;
+    }
+    return JSON.parse(this._storage.getItem(key));
+  }
+
+  public set(key: string, value: any): void {
+    this._storage.setItem(key, JSON.stringify(value));
+  }
+
+  public remove(key: string): void {
+    this._storage.removeItem(key);
+  }
+}
+
+declare type MockBuckets = {[id: string]: MockBucket};
+
+class MockServer {
+
+  private _buckets: MockBuckets = {};
+  private _tasks: TaskItem[] = [];
+  private _storage: MockServerStorage;
+  private _last_updated: Date = new Date(0);
+
+  public constructor() {
+    this._storage = new MockServerStorage();
+    this._createOrUpdateStorage();
+
+  }
+
+  private _createOrUpdateStorage(): void {
+    if (!this._storage.has("last_updated")) {
+      this._createStorage();
+    }
+    this._updateFromStorage();
+  }
+
+  private _createStorage(): void {
 
     const taskA: TaskItem = {
       uuid: uuid.v4(),
@@ -150,6 +196,26 @@ class MockServer {
     this._buckets.backlog.tasks[taskC.uuid] = taskC;
     this._buckets.backlog.tasks[taskD.uuid] = taskD;
     this._tasks = [taskA, taskB, taskC, taskD];
+    this._last_updated = new Date();
+
+    this._writeToStorage();
+  }
+
+  private _writeToStorage(): void {
+    this._storage.set("_buckets", this._buckets);
+    this._storage.set("_tasks", this._tasks);
+    this._storage.set("last_updated", this._last_updated);
+  }
+
+  private _updateFromStorage(): void {
+    this._buckets = this._storage.get<MockBuckets>("_buckets");
+    this._tasks = this._storage.get<TaskItem[]>("_tasks");
+    this._last_updated = this._storage.get<Date>("last_updated");
+  }
+
+  private _updateStorage(): void {
+    this._writeToStorage();
+    this._updateFromStorage();
   }
 
   private _hasBucket(bucket_name: string): boolean {
@@ -234,6 +300,7 @@ class MockServer {
     const task: TaskItem = bucket_from.tasks[task_uuid];
     bucket_to.tasks[task.uuid] = task;
     delete bucket_from.tasks[task.uuid];
+    this._updateStorage();
     return of(this._createResponse<void>(true));
   }
 
@@ -251,6 +318,7 @@ class MockServer {
     }
     const bucket: MockBucket = this._buckets[from];
     delete bucket.tasks[task_uuid];
+    this._updateStorage();
     return of(this._createResponse<void>(true));
   }
 
