@@ -1,4 +1,3 @@
-import { error } from '@angular/compiler/src/util';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, interval, Observable, of } from 'rxjs';
 import * as uuid from 'uuid';
@@ -90,14 +89,6 @@ export interface MockBucket {
   label: string;
   tasks: MockBucketTasks;
 }
-
-declare type MockResponseData =
-  MockBucket |
-  MockBucketTasks |
-  TaskItem |
-  TaskItem[] |
-  string |
-  string[];
 
 export interface MockResponse<T> {
   success: boolean;
@@ -338,23 +329,9 @@ class MockServer {
 })
 export class TasksService {
 
-  private _bucket_backlog: TaskItem[] = [];
-  private _bucket_next: TaskItem[] = [];
-  private _bucket_inprogress: TaskItem[] = [];
-  private _bucket_done: TaskItem[] = [];
   private _server: MockServer;
   private _buckets: {[id: string]: MockBucket} = {};
   private _bucket_subjects: {[id: string]: BehaviorSubject<TaskItem[]>} = {};
-
-  private _subject_backlog: BehaviorSubject<TaskItem[]> =
-    new BehaviorSubject<TaskItem[]>([]);
-  private _subject_next: BehaviorSubject<TaskItem[]> =
-    new BehaviorSubject<TaskItem[]>([]);
-  private _subject_inprogress: BehaviorSubject<TaskItem[]> =
-    new BehaviorSubject<TaskItem[]>([]);
-  private _subject_done: BehaviorSubject<TaskItem[]> =
-    new BehaviorSubject<TaskItem[]>([]);
-
 
   constructor() {
     this._server = new MockServer();
@@ -385,10 +362,8 @@ export class TasksService {
 
   private _updateBuckets(): void {
 
-    // console.log("tasks-svc > updateBuckets");
     this._server.listBuckets().subscribe({
       next: (response: MockResponse<string[]>) => {
-        // console.log("tasks-svc > listBuckets > ", response);
         if (!response || !response.success || !response.data) {
           return;
         }
@@ -419,7 +394,6 @@ export class TasksService {
         this._updateBuckets();
       }
     });
-    // this._updateBuckets();
   }
 
   public drop(from: TasksBucketBaseService, task: TaskItem): void {
