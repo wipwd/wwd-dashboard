@@ -51,7 +51,7 @@
             (click)="toggleSettings()">
             <mat-icon>settings</mat-icon>
           </button>
-          <span *ngIf="isExpanded()">Settings</span>
+          <span [class.expanded-sidenav]="isExpanded()" *ngIf="isExpanded()">Settings</span>
         </mat-toolbar>
         <mat-nav-list *ngIf="isSettingsExpanded()">
           <a mat-list-item href="#">

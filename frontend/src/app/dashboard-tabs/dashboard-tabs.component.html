@@ -1,14 +1,23 @@
 <mat-tab-group>
-  <mat-tab label="Backlog (20)">
-    <app-tasks-organizer></app-tasks-organizer>
+  <mat-tab label="Backlog {{getBacklogCounter()}}">
+    <app-tasks-organizer
+        [bucket_from]="getBacklogService()"
+        [bucket_next]="getNextService()">
+    </app-tasks-organizer>
   </mat-tab>
-  <mat-tab label="Next">
-    <app-tasks-organizer></app-tasks-organizer>
+  <mat-tab label="Next {{getNextCounter()}}">
+    <app-tasks-organizer
+        [bucket_from]="getNextService()"
+        [bucket_next]="getInProgressService()">
+    </app-tasks-organizer>
   </mat-tab>
-  <mat-tab label="In Progress">
-    <app-tasks-table></app-tasks-table>
+  <mat-tab label="In Progress {{getInProgressCounter()}}">
+    <app-tasks-table
+        [bucket_from]="getInProgressService()"
+        [bucket_next]="getDoneService()">
+    </app-tasks-table>
   </mat-tab>
-  <mat-tab label="Done">
-    <app-tasks-table></app-tasks-table>
+  <mat-tab label="Done {{getDoneCounter()}}">
+    <app-tasks-table [bucket_from]="getDoneService()"></app-tasks-table>
   </mat-tab>
 </mat-tab-group>

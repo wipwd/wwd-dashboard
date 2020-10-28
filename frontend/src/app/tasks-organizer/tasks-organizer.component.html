@@ -1,45 +1,76 @@
 <mat-accordion multi class="panels-headers-align">
-  <mat-expansion-panel>
+  <mat-expansion-panel
+      [disabled]="!hasUrgentTasks()"
+      [expanded]="isUrgentExpanded()"
+      (closed)="toggleUrgent()"
+      (opened)="toggleUrgent()">
     <mat-expansion-panel-header>
       <mat-panel-title>
-        <span
-          matBadge="1"
+        <span *ngIf="hasUrgentTasks()"
+          [matBadge]="getNumUrgentTasks()"
           matBadgeOverlap="false"
           matBadgeSize="medium"
           matBadgeColor="warn">Urgent</span>
+        <span *ngIf="!hasUrgentTasks()">Urgent</span>
       </mat-panel-title>
       <mat-panel-description>
         <span></span>
         <mat-icon>error_outline</mat-icon>
       </mat-panel-description>
     </mat-expansion-panel-header>
-    <app-tasks-table></app-tasks-table>
+    <app-tasks-table
+      [bucket_from]="getBucketFrom()"
+      [bucket_next]="getBucketNext()"
+      [priority]="getUrgentPrio()"
+      num_items="10">
+    </app-tasks-table>
   </mat-expansion-panel>
 
-  <mat-expansion-panel>
+  <mat-expansion-panel
+      [disabled]="!hasNormalTasks()"
+      [expanded]="isNormalExpanded()"
+      (closed)="toggleNormal()"
+      (opened)="toggleNormal()">
     <mat-expansion-panel-header>
       <mat-panel-title>
-        <span
-          matBadge="10"
+        <span *ngIf="hasNormalTasks()"
+          [matBadge]="getNumNormalTasks()"
           matBadgeOverlap="false"
           matBadgeSize="medium"
           matBadgeColor="primary">Normal</span>
+        <span *ngIf="!hasNormalTasks()">Normal</span>
       </mat-panel-title>
       <mat-panel-description><span></span><mat-icon>pending</mat-icon></mat-panel-description>
     </mat-expansion-panel-header>
-    <app-tasks-table></app-tasks-table>
+    <app-tasks-table
+      [bucket_from]="getBucketFrom()"
+      [bucket_next]="getBucketNext()"
+      [priority]="getNormalPrio()"
+      num_items="10">
+    </app-tasks-table>
   </mat-expansion-panel>
 
-  <mat-expansion-panel>
+  <mat-expansion-panel
+      [disabled]="!hasOtherTasks()"
+      [expanded]="isOtherExpanded()"
+      (closed)="toggleOther()"
+      (opened)="toggleOther()">
     <mat-expansion-panel-header>
       <mat-panel-title>
-        <span
-          matBadge="10"
+        <span *ngIf="hasOtherTasks()"
+          [matBadge]="getNumOtherTasks()"
           matBadgeOverlap="false"
-          matBadgeSize="medium">Other</span>
+          matBadgeSize="medium"
+          class="tasks-normal">Other</span>
+        <span *ngIf="!hasOtherTasks()">Other</span>
       </mat-panel-title>
       <mat-panel-description><span></span><mat-icon>all_inbox</mat-icon></mat-panel-description>
     </mat-expansion-panel-header>
-    <app-tasks-table></app-tasks-table>
+    <app-tasks-table
+      [bucket_from]="getBucketFrom()"
+      [bucket_next]="getBucketNext()"
+      [priority]="getOtherPrio()"
+      num_items="10">
+    </app-tasks-table>
   </mat-expansion-panel>
 </mat-accordion>
