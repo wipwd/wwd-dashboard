@@ -13,7 +13,7 @@ import { interval } from 'rxjs';
 
 declare type ResponseType = OctokitResponse<GithubNotificationResponseData>;
 
-const PRIORITIES: {[id: string]: TaskPriorityEnum} = {
+const NOTIFICATION_PRIORITIES: {[id: string]: TaskPriorityEnum} = {
   review_requested: TaskPriorityEnum.high,
   mention: TaskPriorityEnum.medium,
   assign: TaskPriorityEnum.high,
@@ -117,11 +117,11 @@ export class GithubService extends IntegrationService {
     }
 
     const task: TaskItem = {
-      priority: PRIORITIES[notification.reason],
+      priority: NOTIFICATION_PRIORITIES[notification.reason],
       url: notification.subject.url,
       title: notification.subject.title,
       updated_at: new Date(notification.updated_at),
-      uuid: `github_${notification.id}`,
+      uuid: `_github_notification_${notification.id}`,
       source_info_icons: task_icons
     };
     this._tasks.push(task);
@@ -130,10 +130,7 @@ export class GithubService extends IntegrationService {
   private _wantsNotification(
     notification: GithubNotificationEntryResponseData
   ): boolean {
-    if (notification.reason === "mention" ||
-        notification.reason === "review_requested" ||
-        notification.reason === "assign" ||
-        notification.reason === "author") {
+    if (notification.reason in NOTIFICATION_PRIORITIES) {
       return true;
     }
     return false;
