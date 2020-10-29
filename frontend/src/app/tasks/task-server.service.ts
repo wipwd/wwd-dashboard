@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { TaskItem, TaskPriorityEnum } from './tasks.service';
 import * as uuid from 'uuid';
 import { Observable, of } from 'rxjs';
+import { TaskItem, TaskPriorityEnum } from './types';
 
 
 declare type ServerBucketTasks = {[id: string]: TaskItem};

@@ -3,7 +3,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { TasksBucketDoneService } from '../tasks/tasks-bucket-done.service';
-import { TaskItem, TaskPriorityEnum, TasksBucketBaseService, TasksService } from '../tasks/tasks.service';
+import { TasksBucketBaseService, TasksService } from '../tasks/tasks.service';
+import { TaskItem, TaskPriorityEnum } from '../tasks/types';
 import { TasksTableDataSource } from './tasks-table-datasource';
 
 @Component({

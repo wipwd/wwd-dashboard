@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { TaskItem, TaskPriorityEnum, TasksBucketBaseService } from '../tasks/tasks.service';
+import { TasksBucketBaseService } from '../tasks/tasks.service';
+import { TaskItem, TaskPriorityEnum } from '../tasks/types';
 
 @Component({
   selector: 'app-tasks-organizer',

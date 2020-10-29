@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import {
-  TaskItem,
   TasksBucketBaseService,
   TasksService
 } from './tasks.service';
+import { TaskItem } from './types';
 
 @Injectable({
   providedIn: 'root'

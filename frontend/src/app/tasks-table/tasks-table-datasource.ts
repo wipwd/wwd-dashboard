@@ -3,7 +3,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { map } from 'rxjs/operators';
 import { Observable, of as observableOf, merge, BehaviorSubject } from 'rxjs';
-import { TasksService, TaskItem, TasksBucketBaseService, TaskPriorityEnum } from '../tasks/tasks.service';
+import { TasksBucketBaseService } from '../tasks/tasks.service';
+import { TaskItem, TaskPriorityEnum } from '../tasks/types';
 
 // TODO: Replace this with your own data model type
 export interface TasksTableItem {
