@@ -27,7 +27,7 @@ export class TasksTableComponent implements AfterViewInit, OnInit {
   /** Columns displayed in the table. Columns IDs can be added, removed, or
    * reordered.
    */
-  displayedColumns = ["priority", "title", "updated_at", "actions"];
+  displayedColumns = ["icons", "priority", "title", "updated_at", "actions"];
 
   constructor(
     private _tasks_svc: TasksService,

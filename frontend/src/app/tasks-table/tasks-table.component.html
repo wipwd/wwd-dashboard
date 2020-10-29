@@ -1,5 +1,18 @@
 <div class="mat-elevation-z8">
   <table mat-table class="full-width-table" matSort aria-label="Elements">
+
+    <!-- Info Icons -->
+    <ng-container matColumnDef="icons">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Info</th>
+      <td mat-cell *matCellDef="let row">
+        <ng-container *ngIf="!!row.source_info_icons">
+          <ng-container  *ngFor="let icon of row.source_info_icons">
+            <mat-icon *ngIf="icon.svg" svgIcon="{{icon.icon}}"></mat-icon>
+            <mat-icon *ngIf="!icon.svg">{{icon.icon}}</mat-icon>
+          </ng-container>
+        </ng-container>
+      </td>
+    </ng-container>
     <!-- Id Column -->
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Id</th>

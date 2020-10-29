@@ -5,7 +5,7 @@ import {
   GithubNotificationResponseData,
   GithubNotificationEntryResponseData
 } from './types';
-import { TaskItem } from '../../tasks/types';
+import { TaskInfoIcon, TaskItem, TaskPriorityEnum } from '../../tasks/types';
 import {
   IntegrationService, IntegrationServiceConfig
 } from '../types';
@@ -61,13 +61,22 @@ export class GithubService extends IntegrationService {
     if (!this._wantsNotification(notification)) {
       return;
     }
+    const task_icons: TaskInfoIcon[] = [{icon: "github", svg: true}];
+    if (notification.reason === "assign") {
+      task_icons.push({icon: "assignment_late", svg: false});
+    } else if (notification.reason === "mention") {
+      task_icons.push({icon: "chat", svg: false});
+    } else if (notification.reason === "review_requested") {
+      task_icons.push({icon: "rate_review", svg: false});
+    }
 
     const task: TaskItem = {
       priority: PRIORITIES[notification.reason],
       url: notification.subject.url,
       title: notification.subject.title,
       updated_at: new Date(notification.updated_at),
-      uuid: `github_${notification.id}`
+      uuid: `github_${notification.id}`,
+      source_info_icons: task_icons
     };
     this._tasks.push(task);
   }

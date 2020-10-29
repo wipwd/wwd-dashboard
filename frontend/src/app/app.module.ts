@@ -1,4 +1,4 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, DomSanitizer } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -9,7 +9,7 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { DashboardTabsComponent } from './dashboard-tabs/dashboard-tabs.component';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -21,6 +21,7 @@ import { TasksOrganizerComponent } from './tasks-organizer/tasks-organizer.compo
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatBadgeModule } from '@angular/material/badge';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -46,9 +47,24 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatSortModule,
     MatExpansionModule,
     MatBadgeModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+
+  constructor(
+    private _mat_icon_registry: MatIconRegistry,
+    private _dom_sanitizer: DomSanitizer
+  ) {
+    _mat_icon_registry.addSvgIcon(
+      "github",
+      _dom_sanitizer.bypassSecurityTrustResourceUrl(
+        "/assets/github-icon.svg"
+      )
+    );
+  }
+
+}
