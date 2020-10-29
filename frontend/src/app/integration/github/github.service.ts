@@ -16,7 +16,8 @@ declare type ResponseType = OctokitResponse<GithubNotificationResponseData>;
 const PRIORITIES: {[id: string]: TaskPriorityEnum} = {
   review_requested: TaskPriorityEnum.high,
   mention: TaskPriorityEnum.medium,
-  assign: TaskPriorityEnum.high
+  assign: TaskPriorityEnum.high,
+  author: TaskPriorityEnum.high
 };
 
 @Injectable({
@@ -128,7 +129,8 @@ export class GithubService extends IntegrationService {
   ): boolean {
     if (notification.reason === "mention" ||
         notification.reason === "review_requested" ||
-        notification.reason === "assign") {
+        notification.reason === "assign" ||
+        notification.reason === "author") {
       return true;
     }
     return false;
