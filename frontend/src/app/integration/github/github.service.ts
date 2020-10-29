@@ -12,6 +12,12 @@ import {
 
 declare type ResponseType = OctokitResponse<GithubNotificationResponseData>;
 
+const PRIORITIES: {[id: string]: TaskPriorityEnum} = {
+  review_requested: TaskPriorityEnum.high,
+  mention: TaskPriorityEnum.medium,
+  assign: TaskPriorityEnum.high
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -57,7 +63,7 @@ export class GithubService extends IntegrationService {
     }
 
     const task: TaskItem = {
-      priority: 10,
+      priority: PRIORITIES[notification.reason],
       url: notification.subject.url,
       title: notification.subject.title,
       updated_at: new Date(notification.updated_at),
