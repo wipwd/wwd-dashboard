@@ -83,6 +83,9 @@ export class GithubService extends IntegrationService {
     }
     if (!!tasks) {
       this._tasks = JSON.parse(tasks);
+      this._tasks.forEach( (task: TaskItem) => {
+        task.updated_at = new Date(task.updated_at);
+      });
     }
     if (!!notifications) {
       this._notifications = JSON.parse(notifications);
