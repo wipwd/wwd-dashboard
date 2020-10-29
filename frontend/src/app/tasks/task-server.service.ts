@@ -123,7 +123,8 @@ export class TaskServerService {
         tasks.forEach( (task: TaskItem) => {
           if (task.uuid in this._task_by_uuid) {
             // task exists; should we update?
-            if (task.updated_at === this._task_by_uuid[task.uuid].updated_at) {
+            const updated_at: Date = this._task_by_uuid[task.uuid].updated_at;
+            if (task.updated_at.getTime() === updated_at.getTime()) {
               // no changes; ignore.
               return;
             }
@@ -201,7 +202,7 @@ export class TaskServerService {
   private _updateFromStorage(): void {
     this._buckets = this._storage.get<ServerBuckets>("_buckets");
     this._tasks = this._storage.get<TaskItem[]>("_tasks");
-    this._last_updated = this._storage.get<Date>("last_updated");
+    this._last_updated = new Date(this._storage.get<string>("last_updated"));
   }
 
   private _updateStorage(): void {

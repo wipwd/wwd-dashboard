@@ -9,6 +9,7 @@ import { TaskInfoIcon, TaskItem, TaskPriorityEnum } from '../../tasks/types';
 import {
   IntegrationService, IntegrationServiceConfig
 } from '../types';
+import { interval } from 'rxjs';
 
 declare type ResponseType = OctokitResponse<GithubNotificationResponseData>;
 
@@ -23,17 +24,39 @@ const PRIORITIES: {[id: string]: TaskPriorityEnum} = {
 })
 export class GithubService extends IntegrationService {
 
+  private _octokit: Octokit;
   private _notifications: GithubNotificationEntryResponseData[] = [];
   private _tasks: TaskItem[] = [];
+  private _tasks_by_uuid: {[id: string]: TaskItem} = {};
+  private _last_update: Date = new Date(0);
 
   constructor() {
     super();
-    const octokit: Octokit = new Octokit({
+    this._octokit = new Octokit({
       auth: "",
       log: console
     });
 
-    octokit.activity.listNotificationsForAuthenticatedUser({
+    this._loadState();
+
+    interval(10000).subscribe({
+      next: () => { this._obtainState(); }
+    });
+    this._obtainState();
+  }
+
+  private _obtainState(): void {
+    const now: Date = new Date();
+    if ((now.getTime() - this._last_update.getTime()) < 60000) {
+      console.debug("github updated recently, skip update.");
+      return;
+    }
+    this._obtainNotifications();
+    this._storeState();
+  }
+
+  private _obtainNotifications(): void {
+    this._octokit.activity.listNotificationsForAuthenticatedUser({
       participating: true
     })
     .then( ({data: result}: ResponseType) => {
@@ -44,8 +67,26 @@ export class GithubService extends IntegrationService {
         this._notifications.push(entry);
       });
       this._updateTasks(this._tasks);
-      // this._storeState();
     });
+
+  }
+
+  private _loadState(): void {
+    const storage: Storage = window.localStorage;
+    const last_update: string|null = storage.getItem("_github_last_update");
+    const tasks: string|null = storage.getItem("_github_tasks");
+    const notifications: string|null = storage.getItem("_github_notifications");
+
+    if (!!last_update) {
+      this._last_update = new Date(JSON.parse(last_update));
+    }
+    if (!!tasks) {
+      this._tasks = JSON.parse(tasks);
+    }
+    if (!!notifications) {
+      this._notifications = JSON.parse(notifications);
+    }
+    this._updateTasks(this._tasks);
   }
 
   private _storeState(): void {
@@ -53,6 +94,7 @@ export class GithubService extends IntegrationService {
     storage.setItem("_github_tasks", JSON.stringify(this._tasks));
     storage.setItem("_github_notifications",
       JSON.stringify(this._notifications));
+    storage.setItem("_github_last_update", JSON.stringify(new Date()));
   }
 
   private _handleNotification(
