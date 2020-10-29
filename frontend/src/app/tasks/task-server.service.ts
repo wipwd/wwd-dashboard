@@ -2,7 +2,45 @@ import { Injectable } from '@angular/core';
 import * as uuid from 'uuid';
 import { Observable, of } from 'rxjs';
 import { TaskItem, TaskPriorityEnum } from './types';
+import {
+  IntegrationManagerService
+} from '../integration/integration-manager.service';
 
+
+/*
+ *           Github     Redmine   Bugzilla
+ *             /\         /\         /\
+ *             ||         ||         ||
+ *      .------||---------||---------||------.
+ *      |      ||    INTEGRATIONS    ||      |
+ *      |      ||         ||         ||      |
+ *      |      \/         \/         \/      |
+ *      |    ------     ------     ------    |
+ *  .---|   |  GH  |   |  RM  |   |  BZ  |   |---.
+ *  |   |    ------     ------     ------    |   |
+ *  |   |         Integration Manager        |   |
+ *  |   '------------------------------------'   |
+ *  |                Task Server                 |
+ *  '--------------------------------------------'
+ *                      ||
+ *                      \/
+ *             .--------------------.
+ *             |    Task Service    |
+ *             '--------------------'
+ */
+
+abstract class TaskSourceService {
+
+  public abstract drop(task_uuid: string): void;
+  public abstract done(task_uuid: string): void;
+  public abstract read(task_uuid: string): void;
+}
+
+export interface ServerTask {
+  uuid: string;
+  task: TaskItem;
+  service: TaskSourceService;
+}
 
 declare type ServerBucketTasks = {[id: string]: TaskItem};
 
@@ -59,16 +97,46 @@ class ServerStorage {
 })
 export class TaskServerService {
 
-  private _buckets: ServerBuckets = {};
+  private _buckets: ServerBuckets = {} as ServerBuckets;
+  private _task_by_uuid: {[id: string]: TaskItem} = {};
+  private _bucket_by_task_uuid: {[id: string]: string} = {};
   private _tasks: TaskItem[] = [];
   private _storage: ServerStorage;
   private _last_updated: Date = new Date(0);
 
 
-  public constructor() {
+  public constructor(private _integration: IntegrationManagerService) {
     this._storage = new ServerStorage();
-    this._createOrUpdateStorage();
 
+    this._createBucket("backlog", "Backlog");
+    this._createBucket("next", "Next");
+    this._createBucket("inprogress", "In Progress");
+    this._createBucket("done", "Done");
+
+    this._integration.getTasks().subscribe({
+      next: (tasks: TaskItem[]) => {
+        if (!tasks) {
+          return;
+        }
+        this._createBucket("backlog", "Backlog");
+
+        tasks.forEach( (task: TaskItem) => {
+          if (task.uuid in this._task_by_uuid) {
+            // task exists; should we update?
+            if (task.updated_at === this._task_by_uuid[task.uuid].updated_at) {
+              // no changes; ignore.
+              return;
+            }
+            console.error("duplicate task? ", task);
+            return;
+          }
+          this._task_by_uuid[task.uuid] = task;
+          this._bucket_by_task_uuid[task.uuid] = "backlog";
+          this._buckets.backlog.tasks[task.uuid] = task;
+        });
+      }
+    });
+    // this._createOrUpdateStorage();
   }
 
   private _createOrUpdateStorage(): void {
