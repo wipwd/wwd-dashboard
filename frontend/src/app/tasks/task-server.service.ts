@@ -108,6 +108,8 @@ export class TaskServerService {
   public constructor(private _integration: IntegrationManagerService) {
     this._storage = new ServerStorage();
 
+    this._updateFromStorage();
+
     this._createBucket("backlog", "Backlog");
     this._createBucket("next", "Next");
     this._createBucket("inprogress", "In Progress");
@@ -137,71 +139,35 @@ export class TaskServerService {
         });
       }
     });
-    // this._createOrUpdateStorage();
-  }
-
-  private _createOrUpdateStorage(): void {
-    if (!this._storage.has("last_updated")) {
-      this._createStorage();
-    }
-    this._updateFromStorage();
-  }
-
-  private _createStorage(): void {
-
-    const taskA: TaskItem = {
-      uuid: uuid.v4(),
-      updated_at: new Date(),
-      title: "My Test Task A",
-      priority: TaskPriorityEnum.medium,
-      url: "https://fail.wipwd.dev/task/a"
-    };
-    const taskB: TaskItem = {
-      uuid: uuid.v4(),
-      updated_at: new Date(),
-      title: "My Test Task B",
-      priority: TaskPriorityEnum.high,
-      url: "https://fail.wipwd.dev/task/b"
-    };
-    const taskC: TaskItem = {
-      uuid: uuid.v4(),
-      updated_at: new Date(),
-      title: "My Test Task C",
-      priority: TaskPriorityEnum.low,
-      url: "https://fail.wipwd.dev/task/c"
-    };
-    const taskD: TaskItem = {
-      uuid: uuid.v4(),
-      updated_at: new Date(),
-      title: "My Test Task D",
-      priority: TaskPriorityEnum.none,
-      url: "https://fail.wipwd.dev/task/d"
-    };
-
-    this._createBucket("backlog", "Backlog");
-    this._createBucket("next", "Next");
-    this._createBucket("inprogress", "In Progress");
-    this._createBucket("done", "Done");
-
-    this._buckets.backlog.tasks[taskA.uuid] = taskA;
-    this._buckets.backlog.tasks[taskB.uuid] = taskB;
-    this._buckets.backlog.tasks[taskC.uuid] = taskC;
-    this._buckets.backlog.tasks[taskD.uuid] = taskD;
-    this._tasks = [taskA, taskB, taskC, taskD];
-    this._last_updated = new Date();
-
-    this._writeToStorage();
   }
 
   private _writeToStorage(): void {
     this._storage.set("_buckets", this._buckets);
-    this._storage.set("_tasks", this._tasks);
     this._storage.set("last_updated", this._last_updated);
   }
 
   private _updateFromStorage(): void {
+    if (!this._storage.has("_buckets") ||
+        !this._storage.has("last_updated")) {
+      return;
+    }
+    this._buckets = {};
+    this._task_by_uuid = {};
+    this._bucket_by_task_uuid = {};
+    this._tasks = [];
     this._buckets = this._storage.get<ServerBuckets>("_buckets");
-    this._tasks = this._storage.get<TaskItem[]>("_tasks");
+    Object.keys(this._buckets).forEach( (bucketname: string) => {
+      const tasks: ServerBucketTasks = this._buckets[bucketname].tasks;
+      Object.keys(tasks).forEach( (task_uuid: string) => {
+        const task: TaskItem = tasks[task_uuid];
+        if (typeof task.updated_at === "string") {
+          task.updated_at = new Date(task.updated_at);
+        }
+        this._task_by_uuid[task_uuid] = task;
+        this._bucket_by_task_uuid[task_uuid] = bucketname;
+        this._tasks.push(task);
+      });
+    });
     this._last_updated = new Date(this._storage.get<string>("last_updated"));
   }
 
