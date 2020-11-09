@@ -3,7 +3,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTable } from '@angular/material/table';
 import { TasksBucketDoneService } from '../tasks/tasks-bucket-done.service';
-import { TaskItem, TaskPriorityEnum, TasksBucketBaseService, TasksService } from '../tasks/tasks.service';
+import { TasksBucketBaseService, TasksService } from '../tasks/tasks.service';
+import { TaskItem, TaskPriorityEnum } from '../tasks/types';
 import { TasksTableDataSource } from './tasks-table-datasource';
 
 @Component({
@@ -26,7 +27,7 @@ export class TasksTableComponent implements AfterViewInit, OnInit {
   /** Columns displayed in the table. Columns IDs can be added, removed, or
    * reordered.
    */
-  displayedColumns = ["priority", "title", "updated_at", "actions"];
+  displayedColumns = ["icons", "priority", "title", "updated_at", "actions"];
 
   constructor(
     private _tasks_svc: TasksService,
